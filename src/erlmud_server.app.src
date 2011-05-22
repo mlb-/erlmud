@@ -1,0 +1,13 @@
+{application, erlmud_server,
+ [
+  {description, "Erlang MUD server"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erlmud_server_app, []}},
+  %{agner, [{requires, ["cowboy", "jsx"]}]},
+  {env, []}
+ ]}.
