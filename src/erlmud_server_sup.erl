@@ -1,6 +1,5 @@
 
 -module(erlmud_server_sup).
--author('Matthew Batema <matthew.batema@gmail.com>').
 
 -behaviour(supervisor).
 
@@ -10,23 +9,19 @@
 %% Supervisor callbacks
 -export([init/1]).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-include("supervisor.hrl").
 
-%% ===================================================================
 %% API functions
-%% ===================================================================
-
+-spec start_link() -> 'ignore' | {'error',_Reason} | {'ok',pid()}.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% ===================================================================
 %% Supervisor callbacks
-%% ===================================================================
 
 init([]) ->
-	Children = [
-	],
+		Children = [
+			%?CHILD(erlmud_server_worker, worker)
+			%?CHILD(erlmud_server_other_sup, supervisor)
+		],
     {ok, { {one_for_one, 5, 10}, Children} }.
 
-% vim: set sw=4 ts=4

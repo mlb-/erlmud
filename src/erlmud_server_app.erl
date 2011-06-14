@@ -2,12 +2,10 @@
 
 -behaviour(application).
 
-%% Application callbacks
+%% application API
 -export([start/2, stop/1]).
 
-%% ===================================================================
-%% Application callbacks
-%% ===================================================================
+%% application functions
 
 start(_StartType, _StartArgs) ->
     erlmud_server_sup:start_link().
