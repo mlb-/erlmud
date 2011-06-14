@@ -11,4 +11,17 @@ graphical client.
 
 This project is an experiment into using Erlang/OTP and other libraries.
 
+# Structure
+
+## Rooms
+
+Each room will be a process, managed under a supervisor. If a room has no
+action for whatever timeout, it will hibernate (trying not to pre-maturely
+optimize). (Failing to do so:) Possibly add hibernating room to a ETS table
+sorted by time, so to be able to apply yet another timeout, after which,
+terminate hibernating room.
+
+On request for room, an ETS table lookup is done for the process (gproc
+instead, perhaps?). If the room does not exist, the supervisor starts it,
+records the entry, and returns the PID.
 
