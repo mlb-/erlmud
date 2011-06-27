@@ -22,6 +22,7 @@ init([]) ->
 		Children = [
 			%?CHILD(erlmud_server_worker, worker)
 			%?CHILD(erlmud_server_other_sup, supervisor)
+			?CHILD(erlmud_server_area_sup, supervisor)
 		],
     {ok, { {one_for_one, 5, 10}, Children} }.
 

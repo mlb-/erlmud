@@ -13,6 +13,17 @@ This project is an experiment into using Erlang/OTP and other libraries.
 
 # Structure
 
+## World
+
+The base world is a collection of areas. An area is a collection of rooms. This
+provides the initial idea of:
+
+world :: supervisor(areas :: supervisor(rooms :: gen\_server))
+
+## Areas
+
+To be implemented similar to rooms, as described below. Change "room" to "area".
+
 ## Rooms
 
 Each room will be a process, managed under a supervisor. If a room has no
