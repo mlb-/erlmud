@@ -1,9 +1,16 @@
+
 -module(erlmud_server).
 
-% Exposed API
+% OTP API
 -export([start/0]).
 
+% dev API
+-export([restart/0]).
+
 % functions
--spec start() -> 'ok' | {'error',_Reason}.
 start() -> application:start(erlmud_server).
+
+restart() ->
+	application:stop(erlmud_server),
+	?MODULE:start().
 

@@ -1,7 +1,7 @@
 
 -module(erlmud_server_sup).
-
--behaviour(supervisor).
+-behaviour(esupervisor).
+-include_lib("esupervisor/include/esupervisor.hrl").
 
 %% API
 -export([start_link/0]).
@@ -9,20 +9,27 @@
 %% Supervisor callbacks
 -export([init/1]).
 
--include("supervisor.hrl").
-
 %% API functions
--spec start_link() -> 'ignore' | {'error',_Reason} | {'ok',pid()}.
 start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	esupervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% Supervisor callbacks
-
+%% Supervisor callback
 init([]) ->
-		Children = [
-			%?CHILD(erlmud_server_worker, worker)
-			%?CHILD(erlmud_server_other_sup, supervisor)
-			?CHILD(erlmud_server_area_sup, supervisor)
-		],
-    {ok, { {one_for_one, 5, 10}, Children} }.
+	#one_for_one{ % App supervisor
+		children = [
+			% Move under a supervisor of rooms (room_sup? area_sup?), under a
+			% supervisor of areas, under a single "world" supervisor.
+			room(room1),
+			room(room2)
+		]
+	}.
+
+%% Spec description helpers
+room(RoomName) ->
+	Mod = erlmud_server_room,
+	#worker{
+		id = RoomName,
+		modules = [Mod],
+		start_func = {Mod, start_link, [RoomName]}
+	}.
 
