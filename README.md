@@ -1,3 +1,7 @@
+# Revial
+
+Currently, due to the age and neglect, there is a revival branch `revival`
+where current development is taking place.
 
 # ErlMUD
 
