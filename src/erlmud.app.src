@@ -1,4 +1,4 @@
-{application, erlmud_server,
+{application, erlmud,
  [
   {description, "Erlang MUD server"},
   {vsn, git},
@@ -7,6 +7,10 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { erlmud_server_app, []}},
+  {mod, {
+         erlmud_app,
+         [
+         ]}},
   {env, []}
  ]}.
+% vim: ft=erlang

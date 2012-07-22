@@ -1,14 +1,12 @@
--module(erlmud_server_app).
-
+-module(erlmud_app).
 -behaviour(application).
 
-%% application API
+%% OTP API
 -export([start/2, stop/1]).
 
-%% application functions
-
+%% application callbacks
 start(_StartType, _StartArgs) ->
-    erlmud_server_sup:start_link().
+    erlmud_sup:start_link().
 
 stop(_State) ->
     ok.

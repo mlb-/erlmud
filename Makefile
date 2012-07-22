@@ -1,18 +1,18 @@
 
-APP=erlmud_server
+APP=erlmud
 
-.PHONY: clean get-deps compile dev
+.PHONY: clean deps compile dev
 
+all: compile
 
 clean:
-	rebar clean
+	@./rebar clean
 
-get-deps:
-	rebar get-deps
+deps:
+	@./rebar get-deps
 
-compile:
-	rebar compile
+compile: deps
+	@./rebar compile
 
-dev: clean get-deps compile
-	erl -pa ebin deps/*/ebin -s $(APP) -s sync
-
+dev: clean compile
+	erl -pa ebin deps/*/ebin -s sync -s $(APP)
