@@ -1,19 +1,16 @@
--module(erlmud_room).
+-module(erlmud_player).
 -behaviour(gen_server).
 
-%%% Record
-% @TODO: Put into header
+%%% Records
 -record(state, {
-        name = "room1" :: string()
-        ,description = "unimaginative description" :: string()
         }).
 
 %%% Exports
 %% OTP API
 -export([start_link/0]).
 
-%% API
--export([get_attr/1]).
+%%
+-export([get_room/1]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -24,18 +21,17 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-%% API
-get_attr(Attrib) ->
-    gen_server:call(?MODULE, {get_attr, Attrib}).
+get_room(desc) ->
+    gen_server:call(?MODULE, {get_room, desc});
+get_room(name) ->
+    gen_server:call(?MODULE, {get_room, name}).
 
 %% gen_server callbacks
 init([]) ->
-    State = #state{},
-    io:format("Starting room with state ~p~n", [State]),
-    {ok, State}.
+    {ok, #state{}}.
 
-handle_call({get_attr, Attrib}, _From, State) ->
-    Reply = get_attr(Attrib, State),
+handle_call({get_room, Attrib}, _From, State) ->
+    Reply = get_room(Attrib, State),
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -53,7 +49,5 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
-get_attr(desc, #state{description=Desc}) ->
-    Desc;
-get_attr(name, #state{name=Name}) ->
-    Name.
+get_room(Attrib, #state{}) ->
+    erlmud_room:get_attr(Attrib).
