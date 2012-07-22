@@ -20,16 +20,20 @@ init([]) ->
         children = [
             % Move under a supervisor of rooms (room_sup? area_sup?), under a
             % supervisor of areas, under a single "world" supervisor.
-            room(room1),
-            room(room2)
+            #worker{
+                id=erlmud_room
+                },
+            #worker{
+                id=erlmud_player
+                }
             ]
         }.
 
-%% Spec description helpers
-room(RoomName) ->
-    Mod = erlmud_room,
-    #worker{
-        id = RoomName,
-        modules = [Mod],
-        start_func = {Mod, start_link, [RoomName]}
-        }.
+%%% Spec description helpers
+%room(RoomName) ->
+%    Mod = erlmud_room,
+%    #worker{
+%        id = RoomName,
+%        modules = [Mod],
+%        start_func = {Mod, start_link, [RoomName]}
+%        }.

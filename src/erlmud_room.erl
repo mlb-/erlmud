@@ -10,10 +10,9 @@
 %%% Exports
 %% OTP API
 -export([start_link/0]).
--export([start_link/1]).
 
 %% API
--export([get_room/1]).
+-export([get_room/0]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -22,18 +21,13 @@
 %%% Functions
 %% OTP API
 start_link() ->
-    gen_server:start_link(?MODULE, [], []).
-
-start_link(Room) ->
-    gen_server:start_link({local, Room}, ?MODULE, [Room], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [room1], []).
 
 %% API
-get_room(Room) ->
-    gen_server:call(Room, get_name).
+get_room() ->
+    gen_server:call(?MODULE, get_name).
 
 %% gen_server callbacks
-init([]) ->
-    {stop, badargs};
 init([Room]) ->
     RoomName = erlang:atom_to_list(Room),
     io:format("Starting room ~p~n", [RoomName]),
