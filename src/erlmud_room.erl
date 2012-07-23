@@ -10,10 +10,10 @@
 
 %%% Exports
 %% OTP API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% API
--export([get_attr/1]).
+-export([get_attr/2]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -21,21 +21,23 @@
 
 %%% Functions
 %% OTP API
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(Room) when
+        is_atom(Room) ->
+    gen_server:start_link({local, Room}, ?MODULE, [Room], []).
 
 %% API
-get_attr(Attrib) ->
-    gen_server:call(?MODULE, {get_attr, Attrib}).
+get_attr(PID, Attrib) ->
+    gen_server:call(PID, {attr, Attrib}).
 
 %% gen_server callbacks
-init([]) ->
-    State = #state{},
+init([Room]) ->
+    RoomName = erlang:atom_to_list(Room),
+    State = #state{name=RoomName},
     io:format("Starting room with state ~p~n", [State]),
     {ok, State}.
 
-handle_call({get_attr, Attrib}, _From, State) ->
-    Reply = get_attr(Attrib, State),
+handle_call({attr, Attrib}, _From, State) ->
+    Reply = attr(Attrib, State),
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -53,7 +55,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
-get_attr(desc, #state{description=Desc}) ->
+attr(desc, #state{description=Desc}) ->
     Desc;
-get_attr(name, #state{name=Name}) ->
+attr(name, #state{name=Name}) ->
     Name.

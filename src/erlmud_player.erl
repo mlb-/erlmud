@@ -3,6 +3,7 @@
 
 %%% Records
 -record(state, {
+        room=room1
         }).
 
 %%% Exports
@@ -21,6 +22,7 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
+%% API
 get_room(desc) ->
     gen_server:call(?MODULE, {get_room, desc});
 get_room(name) ->
@@ -49,5 +51,5 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
-get_room(Attrib, #state{}) ->
-    erlmud_room:get_attr(Attrib).
+get_room(Attrib, #state{room=Room}) ->
+    erlmud_room:get_attr(Room, Attrib).
