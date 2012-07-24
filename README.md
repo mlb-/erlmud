@@ -1,38 +1,30 @@
 
-# ErlMUD
+# erlMud
 
-ErlMUD is a MUD-like server written in erlang.
+erlMud is an Erlang MUD-like server.
 
-The driving idea is to write a game that can be played from multiple clients.
-At the time of writing, this means a MUD-like telnet client (which will be the
-initial development focus), a nethack-like webpage client (using something fun,
-like websockets/socket.io(-erlang)), and a Dwarven Fortress GUI-styled
-graphical client.
+The idea is a game server that multiple clients can play. Intended clients
+are:
 
-This project is an experiment into using Erlang/OTP and other libraries.
+- a MUD-like telnet client (which will be the initial development focus)
+- a nethack-like webpage client
+- a Dwarven Fortress GUI-styled graphical client.
 
-# Structure
+This project is an experiment in using Erlang/OTP and other libraries.
 
-## World
+# Direction
 
-The base world is a collection of areas. An area is a collection of rooms. This
-provides the initial idea of:
+Initially, scope will be small, focusing on features necessary, before
+abstracting.
 
-world :: supervisor(areas :: supervisor(rooms :: gen\_server))
+## Milestones
 
-## Areas
+- A player that can "see" the attributes of rooms and navigate between them
+- A serialized form for loading collections of rooms (areas?). Later abstract
+	as a general fixture loader
+- A client (telnet or web) for interacting as the player
+- Multi-player support
+- Suggestions?
 
-To be implemented similar to rooms, as described below. Change "room" to "area".
-
-## Rooms
-
-Each room will be a process, managed under a supervisor. If a room has no
-action for whatever timeout, it will hibernate (trying not to pre-maturely
-optimize). (Failing to do so:) Possibly add hibernating room to a ETS table
-sorted by time, so to be able to apply yet another timeout, after which,
-terminate hibernating room.
-
-On request for room, an ETS table lookup is done for the process (gproc
-instead, perhaps?). If the room does not exist, the supervisor starts it,
-records the entry, and returns the PID.
-
+So far, I have a "room" and a "player", both `gen_server`s for the time being
+(eventually, a `gen_event` and `gen_fsm`, respectively).
