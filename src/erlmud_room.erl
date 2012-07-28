@@ -4,8 +4,9 @@
 %%% Record
 % @TODO: Put into header
 -record(state, {
-        name = "room1" :: string()
-        ,description = "unimaginative description" :: string()
+        id = room0 :: atom(),
+        name = "room0" :: string(),
+        description = "unimaginative description" :: string()
         }).
 
 %%% Exports
@@ -21,18 +22,24 @@
 
 %%% Functions
 %% OTP API
+start_link({RoomId, RoomName, RoomDesc}) when
+        is_atom(RoomId) ->
+    State = #state{id=RoomId, name=RoomName, description=RoomDesc},
+    gen_server:start_link({local, RoomId}, ?MODULE, State, []);
 start_link(Room) when
         is_atom(Room) ->
-    gen_server:start_link({local, Room}, ?MODULE, [Room], []).
+    gen_server:start_link({local, Room}, ?MODULE, Room, []).
 
 %% API
 get_attr(PID, Attrib) ->
     gen_server:call(PID, {attr, Attrib}).
 
 %% gen_server callbacks
-init([Room]) ->
+init(Room) when
+        is_atom(Room) ->
     RoomName = erlang:atom_to_list(Room),
-    State = #state{name=RoomName},
+    init(#state{name=RoomName});
+init(#state{}=State) ->
     io:format("Starting room with state ~p~n", [State]),
     {ok, State}.
 

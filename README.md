@@ -21,7 +21,7 @@ abstracting.
 
 - A player that can "see" the attributes of rooms and navigate between them
 - A serialized form for loading collections of rooms (areas?). Later abstract
-	as a general fixture loader
+  as a general fixture loader
 - A client (telnet or web) for interacting as the player
 - Multi-player support
 - Suggestions?

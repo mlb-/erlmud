@@ -6,6 +6,9 @@
 %% API
 -export([start_link/0]).
 
+%% dev API
+-export([start_room/1]).
+
 %% Supervisor callbacks
 -export([init/1]).
 
@@ -31,20 +34,14 @@ init([]) ->
                 }
             ]
         }.
-%    [
-%        supervisor:start_child(room_sofo, [Room])
-%        || Room <- [room1, room2, room3]
-%          ]
-%    .
 
-%%% Spec description helpers
-%room(RoomName) ->
-%    Mod = erlmud_room,
-%    #worker{
-%        id = RoomName,
-%        modules = [Mod],
-%        start_func = {Mod, start_link, [RoomName]}
-%        }.
+start_room(Room) when
+        is_atom(Room) ->
+    {ok, RoomList} = file:consult("priv/rooms.fixture"),
+    case lists:keyfind(Room, 1, RoomList) of
+        false -> {not_found, Room};
+        R -> supervisor:start_child(room_sofo, [R])
+    end.
 
 room_sofo() ->
     Mod = erlmud_room,

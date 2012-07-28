@@ -30,7 +30,17 @@ get_room(name) ->
 
 %% gen_server callbacks
 init([]) ->
-    {ok, #state{}}.
+    init(#state{});
+init(#state{room=Room}=State) ->
+    case erlmud_sup:start_room(Room) of
+        {ok, _PID} ->
+            {ok, State};
+        {error, {already_started, _PID}} ->
+            {ok, State};
+        {not_found, R} ->
+            io:format("Could not find room: ~p~n", [R]),
+            init(State#state{room=room1})
+    end.
 
 handle_call({get_room, Attrib}, _From, State) ->
     Reply = get_room(Attrib, State),
