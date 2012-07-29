@@ -1,7 +1,7 @@
 
-# erlMud
+# erlmud
 
-erlMud is an Erlang MUD-like server.
+erlmud is an Erlang MUD-like server.
 
 The idea is a game server that multiple clients can play. Intended clients
 are:
