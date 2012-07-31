@@ -42,7 +42,7 @@ init(Room) when
     RoomName = erlang:atom_to_list(Room),
     init(#state{name=RoomName});
 init(#state{}=State) ->
-    io:format("Starting room with state ~p~n", [State]),
+    io:format("Starting room: ~ts~n", [State#state.name]),
     {ok, State}.
 
 handle_call({attr, Attrib}, _From, State) ->

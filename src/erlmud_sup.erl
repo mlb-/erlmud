@@ -30,14 +30,15 @@ init([]) ->
                     ]
                 },
             #worker{
-                id=erlmud_player
+                id = erlmud_player
                 }
             ]
         }.
 
 start_room(Room) when
         is_atom(Room) ->
-    {ok, RoomList} = file:consult("priv/rooms.fixture"),
+    Priv = code:priv_dir(erlmud),
+    {ok, RoomList} = file:consult(Priv ++ "/rooms.fixture"),
     case lists:keyfind(Room, 1, RoomList) of
         false -> {not_found, Room};
         R -> supervisor:start_child(room_sofo, [R])
