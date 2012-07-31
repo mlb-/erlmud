@@ -6,6 +6,7 @@
   {applications, [
                   kernel,
                   stdlib
+                  ,sync
                  ]},
   {mod, {
          erlmud_app,

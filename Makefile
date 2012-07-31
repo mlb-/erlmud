@@ -14,5 +14,5 @@ deps:
 compile: deps
 	@./rebar compile
 
-dev: clean compile
-	erl -pa ebin deps/*/ebin -s sync -s $(APP)
+dev: compile
+	erl -pa ../erlmud/ebin deps/*/ebin -s $(APP)
