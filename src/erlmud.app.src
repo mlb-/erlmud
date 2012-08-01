@@ -5,13 +5,17 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  ranch
                   ,sync
                  ]},
   {mod, {
          erlmud_app,
          [
          ]}},
-  {env, []}
+  {env, []},
+  {start_phases, [
+                  {telnet, []}
+                 ]}
  ]}.
 % vim: ft=erlang
