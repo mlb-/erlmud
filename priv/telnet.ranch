@@ -1,5 +1,5 @@
 % @todo: Remember to increase acceptor pool size
-{acceptors, 1}.
+{acceptors, 10}.
 {port, 8023}.
 {protocol, erlmud_telnet_protocol}.
 {protocol_opts, []}.
