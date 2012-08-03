@@ -85,5 +85,45 @@ build_lines(Msg, #state{buffer=Buffer} = State) ->
     State#state{buffer = NewBuffer}.
 
 handle_line(Msg, State) ->
-    ?PRINT(binary:split(Msg, <<" ">>)),
+    [Command|Args] = binary:split(Msg, <<" ">>),
+    handle_command(Command, Args, State),
     send_prompt(State).
+
+handle_command(<<"">>, _Args, _State) ->
+    ok;
+handle_command(<<"look">>, _Args, State) ->
+    Exits = case get_exits() of
+        [] -> "none";
+        List ->
+            [
+                "[ ",
+                string:join(List, ", "),
+                " ]"
+                ]
+    end,
+    Out = [
+        erlmud_player:get_room(name),
+        <<"\r\n">>,
+        <<"  ">>,
+        erlmud_player:get_room(desc),
+        <<"\r\n">>,
+        <<"\r\n">>,
+        <<"Exits: ">>,
+            Exits,
+        <<"\r\n">>,
+        <<"\r\n">>
+        ],
+    send(Out,
+         State);
+handle_command(Command, _Args, State) ->
+    case [erlmud_player:go(Exit)
+          || Exit <- get_exits(),
+             erlang:list_to_bitstring(Exit) == Command
+            ] of
+        [] ->
+            send(["Unknown command: ", Command, "\r\n"], State);
+        [ok] -> handle_command(<<"look">>, [], State)
+    end.
+
+get_exits() ->
+    [Exit || {Exit, _RoomId} <- erlmud_player:get_room(exits)].
