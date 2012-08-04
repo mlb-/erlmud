@@ -7,9 +7,11 @@
         socket :: inet:socket(),
         transport :: module(),
         opts :: list(term()),
+        player :: pid(),
         buffer = <<>> :: binary()
         }).
 
+%%%
 %%% Exports
 %% OTP API
 -export([start_link/4]).
@@ -26,13 +28,16 @@ start_link(ListenerPid, Socket, Transport, Opts) ->
 
 %% gen_server callbacks
 init({#state{}=State, ListenerPid}) ->
+    {ok, Player} = erlmud_sup:start_player(),
     % Synchronous start_link/init, hence ranch accept delayed
     gen_server:cast(self(), {post_init, ListenerPid}),
-    {ok, State}.
+    {ok, State#state{player=Player}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
+handle_cast(stop, State) ->
+    {stop, normal, State};
 handle_cast({post_init, ListenerPid}, State) ->
     post_init(ListenerPid, State),
     {noreply, State};
@@ -40,7 +45,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({tcp_closed, Socket}, #state{socket=Socket}=State) ->
-    {stop, normal, State};
+    {stop, linkdead, State};
 handle_info({tcp, Socket, Msg}, #state{socket=Socket}=State) ->
     NewState = build_lines(Msg, State),
     once_active(State),
@@ -50,7 +55,8 @@ handle_info(Info, State) ->
     once_active(State),
     {noreply, State}.
 
-terminate(_Reason, #state{socket=Socket, transport=Transport}=_State) ->
+terminate(_Reason, #state{socket=Socket, transport=Transport}=State) ->
+    kill_player(State),
     Transport:close(Socket),
     ok.
 
@@ -91,8 +97,11 @@ handle_line(Msg, State) ->
 
 handle_command(<<"">>, _Args, _State) ->
     ok;
-handle_command(<<"look">>, _Args, State) ->
-    Exits = case get_exits() of
+handle_command(<<"quit">>, _Args, #state{}=State) ->
+    send("Goodbye\r\n", State),
+    gen_server:cast(self(), stop);
+handle_command(<<"look">>, _Args, #state{player=Player}=State) ->
+    Exits = case get_exits(State) of
         [] -> "none";
         List ->
             [
@@ -102,10 +111,10 @@ handle_command(<<"look">>, _Args, State) ->
                 ]
     end,
     Out = [
-        erlmud_player:get_room(name),
+        erlmud_player:get_room(Player, name),
         <<"\r\n">>,
         <<"  ">>,
-        erlmud_player:get_room(desc),
+        erlmud_player:get_room(Player, desc),
         <<"\r\n">>,
         <<"\r\n">>,
         <<"Exits: ">>,
@@ -115,9 +124,9 @@ handle_command(<<"look">>, _Args, State) ->
         ],
     send(Out,
          State);
-handle_command(Command, _Args, State) ->
-    case [erlmud_player:go(Exit)
-          || Exit <- get_exits(),
+handle_command(Command, _Args, #state{player=Player}=State) ->
+    case [erlmud_player:go(Player, Exit)
+          || Exit <- get_exits(State),
              erlang:list_to_bitstring(Exit) == Command
             ] of
         [] ->
@@ -125,5 +134,8 @@ handle_command(Command, _Args, State) ->
         [ok] -> handle_command(<<"look">>, [], State)
     end.
 
-get_exits() ->
-    [Exit || {Exit, _RoomId} <- erlmud_player:get_room(exits)].
+get_exits(#state{player=Player}) ->
+    [Exit || {Exit, _RoomId} <- erlmud_player:get_room(Player, exits)].
+
+kill_player(#state{player=Player}) ->
+    supervisor:terminate_child(player_sofo, Player).
