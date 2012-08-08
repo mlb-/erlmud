@@ -8,7 +8,8 @@
         id = room0 :: atom(),
         name = "room0" :: string(),
         description = "unimaginative description" :: string(),
-        exits = [] :: list({nonempty_string(), atom()})
+        exits = [] :: list({nonempty_string(), atom()}),
+        players = [] :: list(pid())
         }).
 
 %%% Exports
@@ -16,7 +17,7 @@
 -export([start_link/1]).
 
 %% API
--export([get_attr/2]).
+-export([get_attr/2, enter/2, leave/3]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -36,6 +37,12 @@ start_link(Room) when
 get_attr(PID, Attrib) ->
     gen_server:call(PID, {attr, Attrib}).
 
+enter(PID, Player) ->
+    gen_server:cast(PID, {enter, Player}).
+
+leave(PID, Player, How) ->
+    gen_server:cast(PID, {leave, Player, How}).
+
 %% gen_server callbacks
 init(Room) when
         is_atom(Room) ->
@@ -51,6 +58,12 @@ handle_call({attr, Attrib}, _From, State) ->
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
+handle_cast({leave, Player, How}, State) ->
+    NewState = remove_player(Player, How, State),
+    {noreply, NewState};
+handle_cast({enter, Player}, State) ->
+    NewState = add_player(Player, State),
+    {noreply, NewState};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -64,9 +77,22 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Internal functions
+attr(players, #state{players=Players}) ->
+    Players;
 attr(exits, #state{exits=Exits}) ->
     Exits;
 attr(desc, #state{description=Desc}) ->
     Desc;
 attr(name, #state{name=Name}) ->
     Name.
+
+remove_player(Player, How, #state{players=Players}=State) ->
+    RemainingPlayers = Players -- [Player],
+    [ erlmud_player:notify(PID, {exited_room, Player, How})
+                                 || PID <- RemainingPlayers],
+    State#state{players=RemainingPlayers}.
+
+add_player(Player, #state{players=Players}=State) ->
+    [ erlmud_player:notify(PID, {entered_room, Player})
+                                 || PID <- Players],
+    State#state{players=[Player|Players]}.

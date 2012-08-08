@@ -7,7 +7,7 @@
 -export([start_link/0]).
 
 %% dev API
--export([start_room/1, start_player/0]).
+-export([start_room/1, start_player/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -42,11 +42,22 @@ init([]) ->
 
 start_room(Room) when
         is_atom(Room) ->
+    case get_room_data(Room) of
+        {not_found, Room} ->
+            {not_found, Room};
+        RoomData ->
+            case supervisor:start_child(room_sofo, [RoomData]) of
+                {ok, PID} -> PID;
+                {error, {already_started, PID}} -> PID
+            end
+    end.
+
+get_room_data(Room) ->
     Priv = code:priv_dir(erlmud),
     {ok, RoomList} = file:consult(Priv ++ "/rooms.fixture"),
     case lists:keyfind(Room, 1, RoomList) of
         false -> {not_found, Room};
-        R -> supervisor:start_child(room_sofo, [R])
+        RoomData -> RoomData
     end.
 
 room_sofo() ->
@@ -55,13 +66,14 @@ room_sofo() ->
         registered = room_sofo,
         children = [
             #worker{
+                restart = transient,
                 start_func = {Mod, start_link, []}
                 }
             ]
         }.
 
-start_player() ->
-    supervisor:start_child(player_sofo, []).
+start_player({_ClientType, _PID} = Client) ->
+    supervisor:start_child(player_sofo, [Client]).
 
 player_sofo() ->
     Mod = erlmud_player,
@@ -69,6 +81,7 @@ player_sofo() ->
         registered = player_sofo,
         children = [
             #worker{
+                restart = transient,
                 start_func = {Mod, start_link, []}
                 }
             ]
