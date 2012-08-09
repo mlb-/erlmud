@@ -17,7 +17,7 @@
 -export([start_link/1]).
 
 %% API
--export([get_attr/2, enter/2, leave/3]).
+-export([get_attr/2, enter/2, leave/3, say/3]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -43,6 +43,9 @@ enter(PID, Player) ->
 leave(PID, Player, How) ->
     gen_server:cast(PID, {leave, Player, How}).
 
+say(PID, Player, Msg) ->
+    gen_server:cast(PID, {say, Player, Msg}).
+
 %% gen_server callbacks
 init(Room) when
         is_atom(Room) ->
@@ -58,6 +61,9 @@ handle_call({attr, Attrib}, _From, State) ->
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
+handle_cast({say, Player, Msg}, State) ->
+    handle_say(Player, Msg, State),
+    {noreply, State};
 handle_cast({leave, Player, How}, State) ->
     NewState = remove_player(Player, How, State),
     {noreply, NewState};
@@ -96,3 +102,8 @@ add_player(Player, #state{players=Players}=State) ->
     [ erlmud_player:notify(PID, {entered_room, Player})
                                  || PID <- Players],
     State#state{players=[Player|Players]}.
+
+handle_say(Player, Msg, #state{players=Players}) ->
+    [erlmud_player:notify(PID, {said, Player, Msg})
+                         || PID <- Players -- [Player]],
+    erlmud_player:notify(Player, {you_said, Msg}).

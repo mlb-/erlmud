@@ -13,7 +13,7 @@
 -export([start_link/1]).
 
 %% API
--export([get_room/2, go/2, notify/2, quit/2]).
+-export([get_room/2, go/2, notify/2, quit/2, say/2]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -37,6 +37,9 @@ notify(Player, Event) ->
 quit(Player, Reason) ->
     gen_server:cast(Player, {quit, Reason}).
 
+say(Player, Msg) ->
+    gen_server:cast(Player, {say, Msg}).
+
 %% gen_server callbacks
 init({_ClientType, _ClientPID}=Client) ->
     init(#state{client=Client});
@@ -53,6 +56,9 @@ handle_call(_Request, _From, State) ->
 
 % @todo: Consider handling Reason for other reasons (e.g., linkdeath, idle,
 % etc.)
+handle_cast({say, Msg}, State) ->
+    handle_say(Msg, State),
+    {noreply, State};
 handle_cast({quit, _Reason}, State) ->
     {stop, normal, State};
 handle_cast({notify, Event}, State) ->
@@ -103,3 +109,6 @@ start_room(Room) ->
 
 handle_notify(Event, #state{client={ClientType, ClientPID}}) ->
     ClientType:notify(ClientPID, Event).
+
+handle_say(Msg, #state{room=Room}) ->
+    erlmud_room:say(Room, self(), Msg).

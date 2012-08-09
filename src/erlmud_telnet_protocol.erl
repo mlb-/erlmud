@@ -110,6 +110,8 @@ handle_line(Msg, State) ->
 % or something
 handle_command(<<"">>, _Args, _State) ->
     ok;
+handle_command(<<"say">>, Args, #state{player=Player}) ->
+    erlmud_player:say(Player, Args);
 handle_command(<<"go">>, _Args, State) ->
     send("There is no \"go\" command. Just type the direction you want to go.\r\n", State);
 handle_command(<<"quit">>, _Args, #state{}=State) ->
@@ -159,6 +161,12 @@ handle_command(Command, _Args, #state{player=Player}=State) ->
 get_exits(#state{player=Player}) ->
     [Exit || {Exit, _RoomId} <- erlmud_player:get_room(Player, exits)].
 
+handle_notify({said, Player, Msg}, State) ->
+    send(io_lib:format("\r\n~p says \"~ts\"\r\n", [Player, Msg]), State),
+    send_prompt(State);
+handle_notify({you_said, Msg}, State) ->
+    send(io_lib:format("\r\nYou say \"~ts\"\r\n", [Msg]), State),
+    send_prompt(State);
 handle_notify({exited_room, Player, quit}, State) ->
     send(io_lib:format("\r\n~p has quit.\r\n", [Player]), State),
     send_prompt(State);
