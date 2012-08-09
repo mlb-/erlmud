@@ -1,0 +1,21 @@
+{application, erlmud,
+ [
+  {description, "Erlang MUD server"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  ranch
+                  ,sync
+                 ]},
+  {mod, {
+         erlmud_app,
+         [
+         ]}},
+  {env, []},
+  {start_phases, [
+                  {telnet, []}
+                 ]}
+ ]}.
+% vim: ft=erlang

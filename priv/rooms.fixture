@@ -1,0 +1,4 @@
+% The format is:
+% {room_id, room_name, room_description, ["south", room_id]}.
+{room1, "Root", "This is the first room. You will default here if you try to go to a non-existant room.", [{"south", room2}]}.
+{room2, "South", "This is the second room.", [{"north", room1}]}.
