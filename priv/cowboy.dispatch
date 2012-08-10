@@ -1,0 +1,9 @@
+% @todo: Remember to increase acceptor pool size
+{acceptors, 10}.
+{port, 8008}.
+{dispatch, [
+%{Host, list({Path, Handler, Opts})}
+{'_', [ % Any host
+{[], erlmud_default_handler, []}
+]}
+]}.

@@ -9,6 +9,15 @@
 start(_StartType, _StartArgs) ->
     erlmud_sup:start_link().
 
+start_phase(cowboy, _StartType, _PhaseStartArgs) ->
+    Priv = code:priv_dir(erlmud),
+    {ok, Out} = file:consult(Priv ++ "/cowboy.dispatch"),
+    [Acceptors, Port, Dispatch] = [proplists:get_value(Key, Out)
+                                   || Key <- [acceptors, port, dispatch]],
+    {ok, _PID} = cowboy:start_listener(telnet_listener, Acceptors,
+                                      cowboy_tcp_transport, [{port, Port}],
+                                      cowboy_http_protocol, [{dispatch, Dispatch}]),
+    ok;
 start_phase(telnet, _StartType, _PhaseStartArgs) ->
     Priv = code:priv_dir(erlmud),
     {ok, Out} = file:consult(Priv ++ "/telnet.ranch"),
