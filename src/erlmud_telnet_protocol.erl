@@ -65,8 +65,7 @@ handle_info(Info, State) ->
     once_active(State),
     {noreply, State}.
 
-terminate(Reason, #state{socket=Socket, transport=Transport, player=Player}=_State) ->
-    erlmud_player:quit(Player, Reason),
+terminate(_Reason, #state{socket=Socket, transport=Transport}=_State) ->
     Transport:close(Socket),
     ok.
 

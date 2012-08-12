@@ -23,8 +23,7 @@
                     };
                     ws.onmessage = function (evt) {
                         var receivedMsg = evt.data;
-                        var date = new Date();
-                        $("#status").append(date + ": " + receivedMsg + "<br/>");
+                        $("#status").append(receivedMsg + "<br/>");
                     };
                     ws.onclose = function() {
                         // websocket was closed
