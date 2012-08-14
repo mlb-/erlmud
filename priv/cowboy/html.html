@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- @todo: Use html5boilerplate -->
+<html class="no-js">
+  <head>
+    <style>
+      html.no-js         .support .ws {display:none;}
+      html.no-websockets .support .js {display:none;}
+      html.websockets    .support     {display:none;}
+    </style>
+    <!-- @todo: grab custom modernizr for websocket support -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.1/modernizr.min.js"></script>
+    <script>
+      Modernizr.load([
+        {
+          test: Modernizr.websockets,
+					yep : [
+						'//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js',
+						'static/ws_client.js'
+					],
+					complete: function(){ready();}
+        },
+      ]);
+    </script>
+  </head>
+  <body>
+    <div class="support">
+      <span class="js">Oh dear. It appears you don't have javascript enabled.</span>
+      <span class="ws">Oh dear. It appears you don't have websockets enabled.</span>
+      Perhaps you might want to upgrade your browser?
+      <!-- @todo: Add telnet link -->
+      However, if you really are craving that old school experience, try telnet!
+    </div>
+  </body>
+</html>

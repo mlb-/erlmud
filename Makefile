@@ -1,5 +1,8 @@
 
 APP=erlmud
+ERL_ARGS_STATIC_COWBOY=+A 2
+ERL_ARGS_DEPS=-pa ../$(APP)/ebin deps/*/ebin
+ERL_ARGS=$(ERL_ARGS_STATIC_COWBOY) $(ERL_ARGS_DEPS) -s $(APP)
 
 .PHONY: clean deps compile dev
 
@@ -15,4 +18,4 @@ compile: deps
 	@./rebar compile
 
 dev: compile
-	erl -pa ../erlmud/ebin deps/*/ebin -s $(APP)
+	erl $(ERL_ARGS)

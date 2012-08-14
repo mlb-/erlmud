@@ -34,7 +34,7 @@ init({_Any, http}, Req, []) ->
     end.
 
 handle(Req, State) ->
-    {ok, File} = file:read_file("priv/html.html"),
+    {ok, File} = file:read_file("priv/cowboy/html.html"),
     {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"text/html">>}], File, Req),
     {ok, Req2, State}.
 

@@ -4,6 +4,7 @@
 {dispatch, [
 %{Host, list({Path, Handler, Opts})}
 {'_', [ % Any host
+{[<<"static">>, '...'], cowboy_http_static, [{directory, {priv_dir, erlmud, <<"cowboy/static">>}}]},
 {[], erlmud_default_handler, []}
 ]}
 ]}.
