@@ -1,6 +1,5 @@
 -module(erlmud_telnet_protocol).
 -behaviour(gen_server).
--include("log.hrl").
 
 %%% Records
 -record(state, {
@@ -60,8 +59,7 @@ handle_info({tcp, Socket, Msg}, #state{socket=Socket}=State) ->
     NewState = build_lines(Msg, State),
     once_active(State),
     {noreply, NewState};
-handle_info(Info, State) ->
-    ?PRINT(Info),
+handle_info(_Info, State) ->
     once_active(State),
     {noreply, State}.
 
