@@ -50,8 +50,18 @@ websocket_init(_Any, Req, []=_State) ->
     {ok, Req2, State, hibernate}.
 
 websocket_handle({text, Msg}, Req, State) ->
-    Reply = {text, <<"Echoing back: ", Msg/binary>>},
-    {reply, Reply, Req, State, hibernate};
+    Response = case handle_line(Msg, State) of
+        ok -> nothing;
+        %List when is_list(List) -> list_to_bitstring(List);
+        Binary when is_binary(Binary) -> Binary;
+        Term -> list_to_bitstring(io_lib:format("~p", [Term]))
+    end,
+    case Response of
+        nothing -> {ok, Req, State, hibernate};
+        Response ->
+            Reply = {text, <<Response/binary>>},
+            {reply, Reply, Req, State, hibernate}
+    end;
 websocket_handle(_Msg, Req, State) ->
     {ok, Req, State, hibernate}.
 
@@ -77,3 +87,29 @@ send(Msg, #state{ws=WS}) ->
 
 handle_notify(Event, State) ->
     send(io_lib:format("Dunno how to handle: ~p\r\n", [Event]), State).
+
+handle_line(Line, State) ->
+    [Command|Args] = binary:split(Line, <<" ">>),
+    handle_command(Command, Args, State).
+
+handle_command(<<"say">>, Args, #state{player=Player}) ->
+    erlmud_player:say(Player, Args);
+handle_command(<<"look">>, _Args, #state{player=Player}=State) ->
+    [
+        erlmud_player:get_room(Player, name),
+        erlmud_player:get_room(Player, desc),
+            get_exits(State),
+        erlmud_player:get_room(Player, players)
+        ];
+handle_command(Command, _Args, #state{player=Player}=State) ->
+    case [erlmud_player:go(Player, Exit) ||
+            Exit <- get_exits(State),
+            erlang:list_to_bitstring(Exit) =:= Command] of
+        [] ->
+            <<"Unknown command: ", Command/binary>>;
+        [ok] ->
+            handle_command(<<"look">>, [], State)
+    end.
+
+get_exits(#state{player=Player}) ->
+    [Exit || {Exit, _RoomId} <- erlmud_player:get_room(Player, exits)].
