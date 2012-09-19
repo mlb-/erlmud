@@ -14,7 +14,7 @@ start_phase(cowboy, _StartType, _PhaseStartArgs) ->
     {ok, Out} = file:consult(Priv ++ "/cowboy.dispatch"),
     [Acceptors, Port, Dispatch] = [proplists:get_value(Key, Out)
                                    || Key <- [acceptors, port, dispatch]],
-    {ok, _PID} = cowboy:start_listener(telnet_listener, Acceptors,
+    {ok, _PID} = cowboy:start_listener(websocket_listener, Acceptors,
                                       cowboy_tcp_transport, [{port, Port}],
                                       cowboy_http_protocol, [{dispatch, Dispatch}]),
     ok;

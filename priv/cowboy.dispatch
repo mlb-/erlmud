@@ -4,7 +4,12 @@
 {dispatch, [
 %{Host, list({Path, Handler, Opts})}
 {'_', [ % Any host
-{[<<"static">>, '...'], cowboy_http_static, [{directory, {priv_dir, erlmud, <<"cowboy/static">>}}]},
+{[<<"static">>, '...'], cowboy_http_static, [
+	{directory, {priv_dir, erlmud, <<"cowboy/static">>}},
+	{mimetypes, [
+		{<<".js">>, [<<"application/x-javascript">>]}
+	]}
+]},
 {[], erlmud_default_handler, []}
 ]}
 ]}.
