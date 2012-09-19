@@ -19,6 +19,7 @@ currently am making use of:
 - [esupervisor](https://github.com/spawngrid/esupervisor) for being able to
 	manipulate supervisor architecture quickly and easily
 - [ranch](https://github.com/extend/ranch) for telnet!
+- [cowboy](https://github.com/extend/cowboy) for websockets
 
 
 # Direction
@@ -35,12 +36,16 @@ are found.
 - A client telnet for interacting as the player
 - Multi-player support
 
-As the above revial milestones have been met, it's time to merge into master!
+As the above revival milestones have been met, it's time to merge into master!
 
-## Still on the todo list
+## Completed
 
 - Use [cowboy](https://github.com/extend/cowboy) to create an initial web
 	client interface
+
+## The TODO list
+
+- Refactor protocol command handling into a common module
 - Abstract groups of rooms under an "area" collection
 - Write a parser for [stock areas](http://download.ansalonmud.net/area/) to
 	test "area"s with
