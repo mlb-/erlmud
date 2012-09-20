@@ -7,6 +7,7 @@
                   kernel,
                   stdlib,
                   ranch
+                  ,cowboy
                   ,sync
                  ]},
   {mod, {
@@ -16,6 +17,7 @@
   {env, []},
   {start_phases, [
                   {telnet, []}
+                  ,{cowboy, []}
                  ]}
  ]}.
 % vim: ft=erlang

@@ -13,7 +13,7 @@
 -export([start_link/1]).
 
 %% API
--export([get_room/2, go/2, notify/2, quit/2, say/2]).
+-export([get_room/2, go/2, notify/2, say/2]).
 
 %% gen_server API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -34,14 +34,12 @@ go(Player, Direction) ->
 notify(Player, Event) ->
     gen_server:cast(Player, {notify, Event}).
 
-quit(Player, Reason) ->
-    gen_server:cast(Player, {quit, Reason}).
-
 say(Player, Msg) ->
     gen_server:cast(Player, {say, Msg}).
 
 %% gen_server callbacks
-init({_ClientType, _ClientPID}=Client) ->
+init({_ClientType, ClientPID}=Client) ->
+    erlang:monitor(process, ClientPID),
     init(#state{client=Client});
 % @todo: Rewrite later to support persistant player characters
 init(#state{room=Room}=State) ->
@@ -59,8 +57,6 @@ handle_call(_Request, _From, State) ->
 handle_cast({say, Msg}, State) ->
     handle_say(Msg, State),
     {noreply, State};
-handle_cast({quit, _Reason}, State) ->
-    {stop, normal, State};
 handle_cast({notify, Event}, State) ->
     handle_notify(Event, State),
     {noreply, State};
@@ -70,11 +66,17 @@ handle_cast({change_room, Direction}, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
+handle_info({'DOWN', _Ref, process, ClientPID, Reason},
+            #state{room=Room, client={_Module, ClientPID}}=State) ->
+    erlmud_room:leave(Room, self(), Reason),
+    {stop, normal, State#state{room=undefined}};
 handle_info(_Info, State) ->
     {noreply, State}.
 
-terminate(_Reason, #state{room=Room}=_State) ->
-    erlmud_room:leave(Room, self(), quit),
+terminate(_Reason, #state{room=Room}=_State) when is_pid(Room) ->
+    erlmud_room:leave(Room, self(), orphaned_client),
+    ok;
+terminate(_Reason, _State) ->
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
